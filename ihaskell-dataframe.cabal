@@ -26,7 +26,6 @@ source-repository head
 library
   exposed-modules:
       IHaskell.Display.Dataframe
-      Lib
   other-modules:
       Paths_ihaskell_dataframe
   autogen-modules:
@@ -55,14 +54,10 @@ executable ihaskell-dataframe-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      Chart
     , base >=4.7 && <5
-    , colour
     , dataframe
     , ihaskell
-    , ihaskell-charts
     , ihaskell-dataframe
-    , lens
     , text
   default-language: Haskell2010
 
@@ -79,11 +74,8 @@ test-suite ihaskell-dataframe-test
   build-depends:
       Chart
     , base >=4.7 && <5
-    , colour
     , dataframe
     , ihaskell
-    , ihaskell-charts
     , ihaskell-dataframe
-    , lens
     , text
   default-language: Haskell2010
