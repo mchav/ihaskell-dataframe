@@ -33,14 +33,9 @@ library
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      Chart
-    , base >=4.7 && <5
-    , colour
+  build-depends: base >=4.7 && <5
     , dataframe
     , ihaskell
-    , ihaskell-charts
-    , lens
     , text
   default-language: Haskell2010
 
@@ -53,8 +48,7 @@ executable ihaskell-dataframe-exe
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-    , base >=4.7 && <5
+  build-depends: base >=4.7 && <5
     , dataframe
     , ihaskell
     , ihaskell-dataframe
@@ -71,9 +65,7 @@ test-suite ihaskell-dataframe-test
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      Chart
-    , base >=4.7 && <5
+  build-depends: base >=4.7 && <5
     , dataframe
     , ihaskell
     , ihaskell-dataframe
