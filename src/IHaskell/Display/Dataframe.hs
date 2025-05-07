@@ -28,7 +28,7 @@ style :: T.Text -> T.Text
 style r = "\n\
   \#dfSearchInput-" <> r <> " {\n\
   \  box-sizing: border-box;\n\
-  \  background-image: url('/css/searchicon.png');\n\
+  \  background-image: url('https://img.icons8.com/ios-glyphs/30/search--v1.png');\n\
   \  background-position: 0.75em 0.75em;\n\
   \  background-repeat: no-repeat;\n\
   \  width: 100%;\n\
@@ -49,12 +49,12 @@ style r = "\n\
   \#dataframeTable-" <> r <> " th, #dataframeTable-" <> r <> " td {\n\
   \  box-sizing: border-box;\n\
   \  text-align: left;\n\
-  \  padding: 12px;\n\
+  \  padding: 1em;\n\
   \}\n\
   \\n\
   \#dataframeTable-" <> r <> " tr {\n\
   \  box-sizing: border-box;\n\
-  \  border-bottom: 1px solid #ddd;\n\
+  \  border-bottom: 0.075em solid #ddd;\n\
   \}\n\
   \\n\
   \#dataframeTable-" <> r <> " tr.header, #dataframeTable-" <> r <> " tr:hover {\n\
@@ -64,11 +64,11 @@ style r = "\n\
   \  box-sizing: border-box;\n\
   \  resize: both;\n\
   \  overflow: auto;\n\
-  \  width: 120px;\n\
-  \  height: 120px;\n\
-  \  margin: 0px;\n\
-  \  padding: 0px;\n\
-  \  border: 1px solid black;\n\
+  \  width: 10em;\n\
+  \  height: 10em;\n\
+  \  margin: 0em;\n\
+  \  padding: 0em;\n\
+  \  border: 0.075em solid black;\n\
   \  display:block;\n\
   \}\n\
   \td.df-cell-" <> r <> " > .df-cell__content-" <> r <> " { {\n\
@@ -76,8 +76,8 @@ style r = "\n\
   \  border: 0;\n\
   \  width: auto;\n\
   \  height: auto;\n\
-  \  min-height: 20px;\n\
-  \  min-width: 20px;\n\
+  \  min-height: 1.5em;\n\
+  \  min-width: 1.5em;\n\
   \}\n"
 
 mkOptions :: [T.Text] -> String
