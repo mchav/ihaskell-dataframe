@@ -37,6 +37,7 @@ library
     , dataframe
     , ihaskell
     , text
+    , random
   default-language: Haskell2010
 
 executable ihaskell-dataframe-exe
