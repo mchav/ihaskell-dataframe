@@ -9,6 +9,8 @@ import           IHaskell.Display
 import qualified DataFrame as D
 import DataFrame (DataFrame)
 
+import Data.Maybe
+
 import qualified Data.Text as T
 import System.Random (randomRIO)
   
@@ -22,7 +24,7 @@ instance IHaskellDisplay DataFrame where
     return $ Display [stringDisplay r, htmlDisplay r]
       where
         columns = fst (D.dimensions val)
-        str r' = table r' (D.columnNames val) (map (D.getRowAsText val) [0..(columns - 1)])
+        str r' = table r' (D.columnNames val) (map (T.pack . fromMaybe "Text" . fmap D.columnTypeString . (`D.getColumn` val)) $ D.columnNames val) (map (D.getRowAsText val) [0..(columns - 1)])
         stringDisplay r' = plain (str r')
         htmlDisplay r' = html' (Just (style r')) (str r')
 
@@ -41,7 +43,11 @@ style r = "\n\
   \#dataframeTable-" <> r <> " {\n\
   \  box-sizing: border-box;\n\
   \  border-collapse: collapse;\n\
-  \  width: 100%;\n\
+  \  max-width: -moz-fit-content;\n\
+  \  max-width: fit-content;\n\
+  \  width: fit-content;\n\
+  \  width: -moz-fit-content;\n\
+  \  overflow: scroll;\n\
   \  border-collapse: collapse;\n\
   \  border: 0.0375em solid #ddd;\n\
   \  font-size: 0.625em;\n\
@@ -80,7 +86,7 @@ style r = "\n\
   \ overflow: auto;\n\
   \ min-width: 4em;\n\
   \ min-height: 1.5em;\n\
-  \ max-width: 15em;\n\
+  \ max-width: 20em;\n\
   \ max-height: 6em;\n\
   \ padding: .125em .25em;\n\
   \ border: 0.03525em solid transparent;\n\
@@ -91,22 +97,22 @@ style r = "\n\
 mkOptions :: [T.Text] -> T.Text
 mkOptions = mconcat . map (\h -> "<option value=\"" <> h <> "\">" <> h <> "</option>\n")
 
-mkHeader :: [T.Text] -> T.Text
-mkHeader = mconcat . map (\h -> "<th>" <> h <> "</th>\n")
+mkHeader :: [(T.Text, T.Text)] -> T.Text
+mkHeader = mconcat . map (\(h, t) -> "<th style=\"text-align: center;\">" <> h <> " <br> [" <> t <> "] </th>\n")
 
 mkCells :: [[T.Text]] -> T.Text
 mkCells = mconcat . map (\b -> "<tr> \n" <> textRow b <> "</tr>\n")
   where textRow = mconcat . map (\b' -> "<td class=\"df-cell\"><div class=\"df-cell__content\"> " <> b' <> "</div></td>\n")
 
-table :: T.Text -> [T.Text] -> [[T.Text]] -> String
-table r header body= T.unpack $ "\
+table :: T.Text -> [T.Text] -> [T.Text] -> [[T.Text]] -> String
+table r header types body= T.unpack $ "\
   \ <input type=\"text\" id=\"dfSearchInput-" <> r <> "\" placeholder=\"Search by field..\" title=\"Type in a value\"> \n \
   \ <label for=\"filters-" <> r <> "\">Choose a field to filter by:</label> \n \
   \ <select id=\"filters-" <> r <> "\" name=\"filters\">\n" <> mkOptions header <>
   "\
   \ </select> \n \
   \ <table id=\"dataframeTable-" <> r <> "\"> \n\
-  \    <thead><tr class=\"header\">" <> mkHeader header <>
+  \    <thead><tr class=\"header\">" <> mkHeader (zip header types) <>
   "    </tr></thead>\n<tbody>\n" <> mkCells body <>
   "</tbody>\n\
   \  </table>\n\
