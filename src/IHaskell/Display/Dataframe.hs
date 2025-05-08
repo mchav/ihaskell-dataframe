@@ -31,13 +31,10 @@ style :: T.Text -> T.Text
 style r = "\n\
   \#dfSearchInput-" <> r <> " {\n\
   \  box-sizing: border-box;\n\
-  \  background-image: url('https://img.icons8.com/ios-glyphs/30/search--v1.png');\n\
-  \  background-position: 0.75em 0.75em;\n\
-  \  background-repeat: no-repeat;\n\
   \  width: 100%;\n\
   \  font-size: 1em;\n\
-  \  padding: 0.8em 1.25em 0.8em 3em;\n\
-  \  border: 0.075em solid #ddd;\n\
+  \  padding: 0.4em 0.625em 0.4em 1.5em;\n\
+  \  border: 0.0375em solid #ddd;\n\
   \  margin-bottom: 0.8em;\n\
   \}\n\
   \\n\
@@ -45,42 +42,50 @@ style r = "\n\
   \  box-sizing: border-box;\n\
   \  border-collapse: collapse;\n\
   \  width: 100%;\n\
-  \  border: 0.075em solid #ddd;\n\
-  \  font-size: 1.25em;\n\
+  \  border-collapse: collapse;\n\
+  \  border: 0.0375em solid #ddd;\n\
+  \  font-size: 0.625em;\n\
   \}\n\
   \\n\
+  \#dataframeTable thead, #dataframeTable tbody tr { display: table; width: 100%; table-layout: fixed; }\n\
+  \#dataframeTable thead th { position: sticky; top: 0; background: #fff; z-index: 1; }\n\
   \#dataframeTable-" <> r <> " th, #dataframeTable-" <> r <> " td {\n\
   \  box-sizing: border-box;\n\
   \  text-align: left;\n\
-  \  padding: 1em;\n\
+  \  padding: 0.5em;\n\
   \}\n\
   \\n\
   \#dataframeTable-" <> r <> " tr {\n\
   \  box-sizing: border-box;\n\
-  \  border-bottom: 0.075em solid #ddd;\n\
+  \  border-bottom: 0.0375em solid #ddd;\n\
   \}\n\
   \\n\
   \#dataframeTable-" <> r <> " tr.header, #dataframeTable-" <> r <> " tr:hover {\n\
   \  background-color: #f1f1f1;\n\
   \}\n\
-  \td.df-cell-" <> r <> " { {\n\
+  \td.df-cell { \n\
   \  box-sizing: border-box;\n\
   \  resize: both;\n\
   \  overflow: auto;\n\
-  \  width: 10em;\n\
-  \  height: 10em;\n\
+  \  width: 5em;\n\
+  \  height: 5em;\n\
   \  margin: 0em;\n\
   \  padding: 0em;\n\
-  \  border: 0.075em solid black;\n\
-  \  display:block;\n\
+  \  border: 0.0375em solid black;\n\
   \}\n\
-  \td.df-cell-" <> r <> " > .df-cell__content-" <> r <> " { {\n\
-  \  box-sizing: border-box;\n\
-  \  border: 0;\n\
-  \  width: auto;\n\
-  \  height: auto;\n\
-  \  min-height: 1.5em;\n\
-  \  min-width: 1.5em;\n\
+  \.hiddenRow { display: none; }\n\
+  \td.df-cell > .df-cell__content {\n\
+  \ box-sizing: border-box;\n\
+  \ resize: both;\n\
+  \ overflow: auto;\n\
+  \ min-width: 4em;\n\
+  \ min-height: 1.5em;\n\
+  \ max-width: 15em;\n\
+  \ max-height: 6em;\n\
+  \ padding: .125em .25em;\n\
+  \ border: 0.03525em solid transparent;\n\
+  \ background: #fff;\n\
+  \ font-family: inherit;\n\
   \}\n"
 
 mkOptions :: [T.Text] -> T.Text
@@ -95,22 +100,22 @@ mkCells = mconcat . map (\b -> "<tr> \n" <> textRow b <> "</tr>\n")
 
 table :: T.Text -> [T.Text] -> [[T.Text]] -> String
 table r header body= T.unpack $ "\
-  \ <input type=\"text\" id=\"dfSearchInput-" <> r <> "\" onkeyup=\"filterDataframe()\" placeholder=\"Search by field..\" title=\"Type in a value\"> \n \
+  \ <input type=\"text\" id=\"dfSearchInput-" <> r <> "\" placeholder=\"Search by field..\" title=\"Type in a value\"> \n \
   \ <label for=\"filters-" <> r <> "\">Choose a field to filter by:</label> \n \
   \ <select id=\"filters-" <> r <> "\" name=\"filters\">\n" <> mkOptions header <>
   "\
   \ </select> \n \
   \ <table id=\"dataframeTable-" <> r <> "\"> \n\
-  \    <tr class=\"header\">" <> mkHeader header <>
-  "    </tr>\n" <> mkCells body <>
-  "\
+  \    <thead><tr class=\"header\">" <> mkHeader header <>
+  "    </tr></thead>\n<tbody>\n" <> mkCells body <>
+  "</tbody>\n\
   \  </table>\n\
   \  <script>\n\
   \ (() => {\n\
   \ const table     = document.getElementById(\"dataframeTable-" <> r <> "\");\n\
-  \ const rows      = Array.from(table.querySelectorAll('tr)).slice(1);\n\
+  \ const rows      = Array.from(table.querySelectorAll('tr')).slice(1);\n\
   \ const headers   = Array.from(table.querySelectorAll('th'));\n\
-  \ const input     = document.getElementById(\"searchInput-" <> r <> "\");\n\
+  \ const input     = document.getElementById(\"dfSearchInput-" <> r <> "\");\n\
   \ const filters   = document.getElementById(\"filters-" <> r <> "\");\n\
   \ let columnIdx = 0;\n\
   \ filters.addEventListener('change', () => {\n\
