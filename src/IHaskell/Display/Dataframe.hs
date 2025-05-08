@@ -15,11 +15,14 @@ import System.Random (randomRIO)
 instance IHaskellDisplay DataFrame where
   display :: DataFrame -> IO Display
   display val = do
+    -- Each table should have its own unique IDs
+    -- suffixed by a random number so filtering doesn't change
+    -- all table values.
     r <- T.pack . show <$> randomRIO @Int (0, 10000)
     return $ Display [stringDisplay r, htmlDisplay r]
       where
         columns = fst (D.dimensions val)
-        str r' = table (T.unpack r') (D.columnNames val) (map (D.getRowAsText val) [0..(columns - 1)])
+        str r' = table r' (D.columnNames val) (map (D.getRowAsText val) [0..(columns - 1)])
         stringDisplay r' = plain (str r')
         htmlDisplay r' = html' (Just (style r')) (str r')
 
@@ -80,53 +83,58 @@ style r = "\n\
   \  min-width: 1.5em;\n\
   \}\n"
 
-mkOptions :: [T.Text] -> String
-mkOptions = mconcat . map ((\h -> "<option value=\"" ++ h ++ "\">" ++ h ++ "</option>\n") . T.unpack)
+mkOptions :: [T.Text] -> T.Text
+mkOptions = mconcat . map (\h -> "<option value=\"" <> h <> "\">" <> h <> "</option>\n")
 
-mkHeader :: [T.Text] -> String
-mkHeader = mconcat . map ((\h -> "<th>" ++ h ++ "</th>\n"). T.unpack)
+mkHeader :: [T.Text] -> T.Text
+mkHeader = mconcat . map (\h -> "<th>" <> h <> "</th>\n")
 
-mkCells :: [[T.Text]] -> String
-mkCells = mconcat . map (\b -> "<tr> \n" ++ textRow b ++ "</tr>\n")
-  where textRow = mconcat . map ((\b' -> "<td class=\"df-cell\"><div class=\"df-cell__content\"> " ++ b' ++ "</div></td>\n") . T.unpack)
+mkCells :: [[T.Text]] -> T.Text
+mkCells = mconcat . map (\b -> "<tr> \n" <> textRow b <> "</tr>\n")
+  where textRow = mconcat . map (\b' -> "<td class=\"df-cell\"><div class=\"df-cell__content\"> " <> b' <> "</div></td>\n")
 
-table :: String -> [T.Text] -> [[T.Text]] -> String
-table r header body= "\
+table :: T.Text -> [T.Text] -> [[T.Text]] -> String
+table r header body= T.unpack $ "\
   \ <input type=\"text\" id=\"dfSearchInput-" <> r <> "\" onkeyup=\"filterDataframe()\" placeholder=\"Search by field..\" title=\"Type in a value\"> \n \
   \ <label for=\"filters-" <> r <> "\">Choose a field to filter by:</label> \n \
-  \ <select id=\"filters-" <> r <> "\" name=\"filters\">\n" ++ mkOptions header ++
+  \ <select id=\"filters-" <> r <> "\" name=\"filters\">\n" <> mkOptions header <>
   "\
   \ </select> \n \
   \ <table id=\"dataframeTable-" <> r <> "\"> \n\
-  \    <tr class=\"header\">" ++ mkHeader header ++
-  "    </tr>\n" ++ mkCells body ++
+  \    <tr class=\"header\">" <> mkHeader header <>
+  "    </tr>\n" <> mkCells body <>
   "\
   \  </table>\n\
   \  <script>\n\
-  \  function filterDataframe() {\n\
-  \    var input, filter, table, tr, td, i, txtValue;\n\
-  \    input = document.getElementById(\"dfSearchInput-" <> r <> "\");\n\
-  \    filter = input.value.toUpperCase();\n\
-  \    table = document.getElementById(\"dataframeTable-" <> r <> "\");\n\
-  \    tr = table.getElementsByTagName(\"tr\");\n\   
-  \    var e = document.getElementById(\"filters-" <> r <> "\");\n\
-  \    var value = e.value\n\
-  \    var index;\n\
-  \    for (i = 0; i < tr[0].getElementsByTagName(\"th\").length; i++) {\n\
-  \      if (tr[0].getElementsByTagName(\"th\")[i].innerText == value) {\n\
-  \        index = i;\n\
-  \      }\n\
-  \    }\n\  
-  \    for (i = 0; i < tr.length; i++) {\n\
-  \      td = tr[i].getElementsByTagName(\"td\")[index];\n\
-  \      if (td) {\n\
-  \        txtValue = td.textContent || td.innerText;\n\
-  \        if (txtValue.toUpperCase().indexOf(filter) > -1) {\n\
-  \          tr[i].style.display = \"\";\n\
-  \        } else {\n\
-  \          tr[i].style.display = \"none\";\n\
-  \        }\n\
-  \      }\n\
-  \    }\n\
-  \  }\n\
+  \ (() => {\n\
+  \ const table     = document.getElementById(\"dataframeTable-" <> r <> "\");\n\
+  \ const rows      = Array.from(table.querySelectorAll('tr)).slice(1);\n\
+  \ const headers   = Array.from(table.querySelectorAll('th'));\n\
+  \ const input     = document.getElementById(\"searchInput-" <> r <> "\");\n\
+  \ const filters   = document.getElementById(\"filters-" <> r <> "\");\n\
+  \ let columnIdx = 0;\n\
+  \ filters.addEventListener('change', () => {\n\
+  \   columnIdx = headers.findIndex(th => th.textContent === filters.value);\n\
+  \   filter();\n\
+  \ });\n\
+  \ input.addEventListener('input', debounce(filter, 150));\n\
+  \ function filter () {\n\
+  \   const term = input.value.trim().toUpperCase();\n\
+  \   if (!term) {\n\
+  \     rows.forEach(r => r.classList.remove('hiddenRow'));\n\
+  \     return;\n\
+  \   }\n\
+  \   rows.forEach(row => {\n\
+  \     const cellText = row.cells[columnIdx].textContent.toUpperCase();\n\
+  \     row.classList.toggle('hiddenRow', !cellText.includes(term));\n\
+  \   });\n\
+  \ }\n\
+  \ function debounce (fn, delay = 200) {\n\
+  \   let t;\n\
+  \   return (...args) => {\n\
+  \     clearTimeout(t);\n\
+  \     t = setTimeout(() => fn.apply(this, args), delay);\n\
+  \   };\n\
+  \ }\n\
+  \ })();\n\
   \  </script>\n"
