@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         libmagic-dev \
         libblas-dev \
         liblapack-dev \
+        libsnappy-dev \
         libffi-dev \
         libgmp-dev \
         gnupg \
@@ -119,7 +120,7 @@ ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
 
 ARG IHASKELL_DISPLAY_COMMIT=c6741bb487cf7fcd1d7d2e01c8e1dccca8c7a8fa
 
-ARG DATAFRAME_COMMIT=1264fd3a393615633754633ee87d292f83264e49
+ARG DATAFRAME_COMMIT=a6e6191bc02c00ee01743077b8301ec4009386cb
 
 # Clone IHaskell and install ghc from the IHaskell resolver
 RUN    cd /opt \
@@ -151,24 +152,24 @@ RUN    stack build $STACK_ARGS ihaskell \
 
 # Install IHaskell.Display libraries
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
-RUN    stack build $STACK_ARGS ihaskell-aeson \
-    && stack build $STACK_ARGS ihaskell-blaze \
-    && stack build $STACK_ARGS ihaskell-charts \
-    && stack build $STACK_ARGS ihaskell-diagrams \
-    && stack build $STACK_ARGS ihaskell-gnuplot \
-    && stack build $STACK_ARGS ihaskell-graphviz \
-    && stack build $STACK_ARGS ihaskell-hatex \
-    && stack build $STACK_ARGS ihaskell-juicypixels \
+RUN stack build $STACK_ARGS ihaskell-aeson
+RUN stack build $STACK_ARGS ihaskell-blaze
+RUN stack build $STACK_ARGS ihaskell-charts
+RUN stack build $STACK_ARGS ihaskell-diagrams
+RUN stack build $STACK_ARGS ihaskell-gnuplot
+RUN stack build $STACK_ARGS ihaskell-graphviz
+RUN stack build $STACK_ARGS ihaskell-hatex
+RUN stack build $STACK_ARGS ihaskell-juicypixels
 #   && stack build $STACK_ARGS ihaskell-magic \
-    && stack build $STACK_ARGS ihaskell-plot \
+RUN stack build $STACK_ARGS ihaskell-plot
 #   && stack build $STACK_ARGS ihaskell-rlangqq \
 #   && stack build $STACK_ARGS ihaskell-static-canvas \
-    && stack build $STACK_ARGS ihaskell-widgets \
-    && stack build $STACK_ARGS hvega \
-    && stack build $STACK_ARGS dataframe \
-    && stack build $STACK_ARGS ihaskell-dataframe \
-    && stack build $STACK_ARGS ihaskell-hvega \
-    && fix-permissions $STACK_ROOT \
+RUN stack build $STACK_ARGS ihaskell-widgets
+RUN stack build $STACK_ARGS hvega
+RUN stack build $STACK_ARGS dataframe
+RUN stack build $STACK_ARGS ihaskell-dataframe
+RUN stack build $STACK_ARGS ihaskell-hvega
+RUN fix-permissions $STACK_ROOT \
 # Fix for https://github.com/IHaskell/ihaskell-notebook/issues/14#issuecomment-636334824
     && fix-permissions /opt/IHaskell \
     && fix-permissions /opt/hvega \
