@@ -109,7 +109,7 @@ ENV PATH ${PATH}:/opt/bin
 # the IHaskell/stack.yaml in this commit.
 # https://github.com/gibiansky/IHaskell/commits/master
 # IHaskell 2022-12-19
-ARG IHASKELL_COMMIT=a27461cc87b0bff09201a290a93a90aeb44c59e7
+ARG IHASKELL_COMMIT=08686e821f93fde0bcecf82b9febc4135b22bb8a
 
 # Specify a git branch for hvega
 # https://github.com/DougBurke/hvega/commits/main
@@ -118,7 +118,7 @@ ARG IHASKELL_COMMIT=a27461cc87b0bff09201a290a93a90aeb44c59e7
 # ihaskell-hvega-0.5.0.3
 ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
 
-ARG IHASKELL_DISPLAY_COMMIT=57f82d2845dde9c74f2ee0622f80fb6e9179cdb7
+ARG IHASKELL_DISPLAY_COMMIT=80639e637705d3f114ec5657a3844baf490eb2a7
 
 ARG DATAFRAME_COMMIT=9d4183d06d53ab67434f28a1580d0d751c1ecd96
 
@@ -249,10 +249,12 @@ RUN    mkdir -p $EXAMPLES_PATH \
     && cp /opt/IHaskell/ihaskell-display/ihaskell-plot/PlotExample.ipynb ihaskell-plot/ \
     && fix-permissions $EXAMPLES_PATH
 
+RUN cp /opt/ihaskell-dataframe/app/*.ipynb /home/$NB_USER/
+RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/
 # Enable this for debugging the kernel messages
-# RUN conda install --quiet --yes \
-#     'jupyterlab-kernelspy' && \
-#     conda clean --all -f -y && \
-#     fix-permissions "${CONDA_DIR}" && \
-#     fix-permissions "/home/${NB_USER}"
+RUN conda install --quiet --yes \
+    'jupyterlab-kernelspy' && \
+    conda clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
 
