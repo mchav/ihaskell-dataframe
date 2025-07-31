@@ -66,7 +66,7 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
 #
 #    curl -sSL https://get.haskellstack.org/ | sh
 #
-ARG STACK_VERSION="2.11.1"
+ARG STACK_VERSION="3.7.1"
 ARG STACK_BINDIST="stack-${STACK_VERSION}-linux-x86_64"
 RUN    cd /tmp \
     && curl -sSL --output ${STACK_BINDIST}.tar.gz https://github.com/commercialhaskell/stack/releases/download/v${STACK_VERSION}/${STACK_BINDIST}.tar.gz \
@@ -109,7 +109,7 @@ ENV PATH ${PATH}:/opt/bin
 # the IHaskell/stack.yaml in this commit.
 # https://github.com/gibiansky/IHaskell/commits/master
 # IHaskell 2022-12-19
-ARG IHASKELL_COMMIT=7a8d728ad1e1c4a869657ab6899a8f58f6fb456c
+ARG IHASKELL_COMMIT=a27461cc87b0bff09201a290a93a90aeb44c59e7
 
 # Specify a git branch for hvega
 # https://github.com/DougBurke/hvega/commits/main
@@ -118,29 +118,27 @@ ARG IHASKELL_COMMIT=7a8d728ad1e1c4a869657ab6899a8f58f6fb456c
 # ihaskell-hvega-0.5.0.3
 ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
 
-ARG IHASKELL_DISPLAY_COMMIT=c6741bb487cf7fcd1d7d2e01c8e1dccca8c7a8fa
+ARG IHASKELL_DISPLAY_COMMIT=57f82d2845dde9c74f2ee0622f80fb6e9179cdb7
 
-ARG DATAFRAME_COMMIT=a6e6191bc02c00ee01743077b8301ec4009386cb
+ARG DATAFRAME_COMMIT=9d4183d06d53ab67434f28a1580d0d751c1ecd96
 
 # Clone IHaskell and install ghc from the IHaskell resolver
-RUN    cd /opt \
-    && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf - \
-    && mv *IHaskell* IHaskell \
-    && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT" | tar xzf - \
-    && mv *hvega* hvega \
-    && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - \
-    && mv *ihaskell-dataframe* ihaskell-dataframe \
-    && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - \
-    && mv *mchav-dataframe* dataframe \
-    && fix-permissions /opt/IHaskell \
-    && fix-permissions $STACK_ROOT \
-    && fix-permissions /opt/hvega \
-    && fix-permissions /opt/ihaskell-dataframe \
-    && fix-permissions /opt/dataframe \
-    && stack setup \
-    && fix-permissions $STACK_ROOT \
-# Clean 176MB
-    && rm /opt/stack/programs/x86_64-linux/ghc*.tar.xz
+RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
+RUN cd /opt && mv *IHaskell* IHaskell
+RUN cd /opt && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT" | tar xzf - 
+RUN cd /opt && mv *hvega* hvega
+RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - 
+RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
+RUN cd /opt && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
+RUN cd /opt && mv *mchav-dataframe* dataframe
+RUN fix-permissions /opt/IHaskell
+RUN fix-permissions /opt/ihaskell-dataframe
+RUN fix-permissions /opt/hvega
+RUN fix-permissions /opt/dataframe
+RUN fix-permissions $STACK_ROOT
+RUN stack upgrade
+RUN stack setup
+RUN fix-permissions $STACK_ROOT
 
 # Build IHaskell
 #

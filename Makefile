@@ -14,7 +14,7 @@ help:
 
 build: DARGS?=
 build: ## Make the latest build of the image
-	$(DOCKER) build $(DARGS) --rm --force-rm -t $(IMAGE):$(TAG) .
+	$(DOCKER) build --build-arg STACK_ARGS='--ghc-options "-O2"' $(DARGS) --rm --force-rm -t $(IMAGE):$(TAG) .
 
 dev: ARGS?=
 dev: DARGS?=
@@ -30,7 +30,7 @@ test-env: ## Make a test environment by installing test dependencies with pip
 
 .PHONY: up
 up: ## Launch JupyterLab with token=x
-	$(DOCKER) run --rm -p 8888:8888 --name ihaskell_notebook $(IMAGE):$(TAG) jupyter lab --ServerApp.token=''
+	$(DOCKER) run --rm -p 8888:8888 --name ihaskell_notebook $(IMAGE):$(TAG) jupyter lab --ServerApp.token='' --debug
 
 .PHONY: build-fast
 build-fast: DARGS?=
