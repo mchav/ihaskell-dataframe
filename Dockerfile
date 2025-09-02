@@ -120,7 +120,7 @@ ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
 
 ARG IHASKELL_DISPLAY_COMMIT=80639e637705d3f114ec5657a3844baf490eb2a7
 
-ARG DATAFRAME_COMMIT=4118a57bf0862842ce7c133afbe4ffd0f539b505
+ARG DATAFRAME_COMMIT=70b666b8dd420256f0c286dbd6e7ea9604c7858e
 
 # Clone IHaskell and install ghc from the IHaskell resolver
 RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -

@@ -47,3 +47,5 @@ extra-deps:
 - glib-0.13.10.0
 - gtk2hs-buildtools-0.13.10.0
 - plot-0.2.3.11
+- granite-0.2.0.2
+- snappy-hs-0.1.0.3
