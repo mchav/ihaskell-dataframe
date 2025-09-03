@@ -17,7 +17,7 @@ instance IHaskellDisplay DataFrame where
       markdownDisplay = markdown str
 
 instance IHaskellDisplay HtmlPlot where
-  display (HtmlPlot val) = return $ Display [stringDisplay, markdownDisplay]
+  display (HtmlPlot val) = return $ Display [stringDisplay, htmlDisplay]
     where
       stringDisplay = plain (T.unpack val)
       htmlDisplay = html (T.unpack val)

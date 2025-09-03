@@ -161,7 +161,7 @@ RUN stack build $STACK_ARGS ihaskell-graphviz
 RUN stack build $STACK_ARGS ihaskell-hatex
 RUN stack build $STACK_ARGS ihaskell-juicypixels
 #   && stack build $STACK_ARGS ihaskell-magic \
-RUN stack build $STACK_ARGS ihaskell-plot
+# RUN stack build $STACK_ARGS ihaskell-plot
 #   && stack build $STACK_ARGS ihaskell-rlangqq \
 #   && stack build $STACK_ARGS ihaskell-static-canvas \
 RUN stack build $STACK_ARGS ihaskell-widgets
@@ -247,8 +247,8 @@ RUN    mkdir -p $EXAMPLES_PATH \
     && mkdir -p ihaskell-hvega \
     && cp /opt/hvega/notebooks/*.ipynb ihaskell-hvega/ \
     && cp /opt/hvega/notebooks/*.tsv ihaskell-hvega/ \
-    && mkdir -p ihaskell-plot \
-    && cp /opt/IHaskell/ihaskell-display/ihaskell-plot/PlotExample.ipynb ihaskell-plot/ \
+    # && mkdir -p ihaskell-plot \
+    # && cp /opt/IHaskell/ihaskell-display/ihaskell-plot/PlotExample.ipynb ihaskell-plot/ \
     && fix-permissions $EXAMPLES_PATH
 
 RUN cp /opt/ihaskell-dataframe/app/*.ipynb /home/$NB_USER/
