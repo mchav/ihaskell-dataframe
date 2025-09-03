@@ -104,6 +104,9 @@ RUN    mkdir -p /opt/bin \
     && fix-permissions /opt/bin
 ENV PATH ${PATH}:/opt/bin
 
+RUN fix-permissions $STACK_ROOT
+RUN stack upgrade
+
 # Specify a git branch for IHaskell (can be branch or tag).
 # The resolver for all stack builds will be chosen from
 # the IHaskell/stack.yaml in this commit.
@@ -111,32 +114,31 @@ ENV PATH ${PATH}:/opt/bin
 # IHaskell 2022-12-19
 ARG IHASKELL_COMMIT=08686e821f93fde0bcecf82b9febc4135b22bb8a
 
+# Clone IHaskell and install ghc from the IHaskell resolver
+RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
+RUN cd /opt && mv *IHaskell* IHaskell
+RUN fix-permissions /opt/IHaskell
+
 # Specify a git branch for hvega
 # https://github.com/DougBurke/hvega/commits/main
 # hvega 2022-06-16
 # hvega-0.12.0.3
 # ihaskell-hvega-0.5.0.3
 ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
-
-ARG IHASKELL_DISPLAY_COMMIT=81061894de763809de2a427341645e4cc18b45ce
-
-ARG DATAFRAME_COMMIT=e4e49f8befc135c4a73708ad5b1e4942b6846d05
-
-# Clone IHaskell and install ghc from the IHaskell resolver
-RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
-RUN cd /opt && mv *IHaskell* IHaskell
 RUN cd /opt && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT" | tar xzf - 
 RUN cd /opt && mv *hvega* hvega
+RUN fix-permissions /opt/hvega
+
+ARG IHASKELL_DISPLAY_COMMIT=81061894de763809de2a427341645e4cc18b45ce
 RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - 
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
+RUN fix-permissions /opt/ihaskell-dataframe
+
+ARG DATAFRAME_COMMIT=e4e49f8befc135c4a73708ad5b1e4942b6846d05
 RUN cd /opt && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
-RUN fix-permissions /opt/IHaskell
-RUN fix-permissions /opt/ihaskell-dataframe
-RUN fix-permissions /opt/hvega
 RUN fix-permissions /opt/dataframe
-RUN fix-permissions $STACK_ROOT
-RUN stack upgrade
+
 RUN stack setup
 RUN fix-permissions $STACK_ROOT
 
@@ -152,8 +154,8 @@ RUN    stack build $STACK_ARGS ihaskell \
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
 RUN stack build $STACK_ARGS ihaskell-aeson
 RUN stack build $STACK_ARGS ihaskell-blaze
-RUN stack build $STACK_ARGS ihaskell-charts
-RUN stack build $STACK_ARGS ihaskell-diagrams
+# RUN stack build $STACK_ARGS ihaskell-charts
+# RUN stack build $STACK_ARGS ihaskell-diagrams
 RUN stack build $STACK_ARGS ihaskell-gnuplot
 RUN stack build $STACK_ARGS ihaskell-graphviz
 RUN stack build $STACK_ARGS ihaskell-hatex
@@ -234,10 +236,10 @@ RUN    mkdir -p $EXAMPLES_PATH \
     && cp --recursive /opt/IHaskell/notebooks/* ihaskell/ \
     && mkdir -p ihaskell-juicypixels \
     && cp /opt/IHaskell/ihaskell-display/ihaskell-juicypixels/*.ipynb ihaskell-juicypixels/ \
-    && mkdir -p ihaskell-charts \
-    && cp /opt/IHaskell/ihaskell-display/ihaskell-charts/*.ipynb ihaskell-charts/ \
-    && mkdir -p ihaskell-diagrams \
-    && cp /opt/IHaskell/ihaskell-display/ihaskell-diagrams/*.ipynb ihaskell-diagrams/ \
+    # && mkdir -p ihaskell-charts \
+    # && cp /opt/IHaskell/ihaskell-display/ihaskell-charts/*.ipynb ihaskell-charts/ \
+    # && mkdir -p ihaskell-diagrams \
+    # && cp /opt/IHaskell/ihaskell-display/ihaskell-diagrams/*.ipynb ihaskell-diagrams/ \
     && mkdir -p ihaskell-gnuplot \
     && cp /opt/IHaskell/ihaskell-display/ihaskell-gnuplot/*.ipynb ihaskell-gnuplot/ \
     && mkdir -p ihaskell-widgets \
