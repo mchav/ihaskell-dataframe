@@ -4,6 +4,7 @@ import           IHaskell.Display
 
 import qualified DataFrame as D
 import qualified DataFrame.Display.Web.Plot as Plot
+import DataFrame.Display.Web.Plot (HtmlPlot(..))
 import DataFrame (DataFrame)
 
 import qualified Data.Text as T
@@ -15,7 +16,7 @@ instance IHaskellDisplay DataFrame where
       stringDisplay = plain str
       markdownDisplay = markdown str
 
-instance IHaskellDisplay Plot.HtmlPlot where
+instance IHaskellDisplay HtmlPlot where
   display (HtmlPlot val) = return $ Display [stringDisplay, markdownDisplay]
     where
       stringDisplay = plain (T.unpack val)
