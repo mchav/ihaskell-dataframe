@@ -53,6 +53,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         git \
         gnupg \
         netbase \
+        zstd \
+        libzstd-dev \
 # Need less for general maintenance
         less && \
 # Clean up apt
@@ -134,7 +136,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=1fe10b264fd3aefd96f1cf5d50295133aa06edf3
+ARG DATAFRAME_COMMIT=1544bfee71a961777520aaa6d1b857651912ca12
 RUN cd /opt && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN fix-permissions /opt/dataframe
@@ -201,7 +203,7 @@ USER $NB_UID
 RUN \
 # Install the IHaskell kernel at /usr/local/share/jupyter/kernels, which is
 # in `jupyter --paths` data:
-       stack exec ihaskell -- install --stack --prefix=/usr/local
+       stack exec ihaskell -- install --stack --prefix=/usr/local --debug
 
 # # We don't need to install the ihaskell_labextension for JupyterLab syntax highlighting
 # # https://github.com/IHaskell/IHaskell/issues/1238#issuecomment-907658217
