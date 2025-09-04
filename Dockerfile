@@ -136,7 +136,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=1544bfee71a961777520aaa6d1b857651912ca12
+ARG DATAFRAME_COMMIT=60df2f5eff56ca9df45d2d7f983925960106320c
 RUN cd /opt && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN fix-permissions /opt/dataframe
@@ -170,7 +170,8 @@ RUN stack build $STACK_ARGS ihaskell-widgets
 RUN stack build $STACK_ARGS hvega
 RUN stack build $STACK_ARGS dataframe
 RUN stack build $STACK_ARGS ihaskell-dataframe
-RUN stack build $STACK_ARGS ihaskell-hvega
+# RUN stack build $STACK_ARGS ihaskell-hvega
+RUN stack build $STACK_ARGS dataframe
 RUN fix-permissions $STACK_ROOT \
 # Fix for https://github.com/IHaskell/ihaskell-notebook/issues/14#issuecomment-636334824
     && fix-permissions /opt/IHaskell \
