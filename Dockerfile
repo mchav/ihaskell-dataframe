@@ -131,7 +131,7 @@ RUN cd /opt && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT
 RUN cd /opt && mv *hvega* hvega
 RUN fix-permissions /opt/hvega
 
-ARG IHASKELL_DISPLAY_COMMIT=81930286e903e82aa0e8d9093f5b0552cce7bdef
+ARG IHASKELL_DISPLAY_COMMIT=e306d5ba296d09badad82358e1098d367daef0a1
 RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - 
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
