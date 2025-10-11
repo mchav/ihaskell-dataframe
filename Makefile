@@ -14,7 +14,7 @@ help:
 
 build: DARGS?=
 build: ## Make the latest build of the image
-	$(DOCKER) build --build-arg STACK_ARGS='--ghc-options "-O2"' $(DARGS) --rm --force-rm -t $(IMAGE):$(TAG) .
+	$(DOCKER) build --build-arg CABAL_ARGS='--ghc-options "-O2"' $(DARGS) --rm --force-rm -t $(IMAGE):$(TAG) .
 
 dev: ARGS?=
 dev: DARGS?=

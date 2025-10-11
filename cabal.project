@@ -1,0 +1,47 @@
+-- Cabal project file replacing global-project.stack.yaml
+-- Uses GHC 9.6.7 (matching lts-22.44)
+
+packages:
+  /opt/IHaskell/ipython-kernel/
+  /opt/IHaskell/ghc-parser/
+  /opt/IHaskell/ihaskell-display/ihaskell-aeson/
+  /opt/IHaskell/ihaskell-display/ihaskell-blaze/
+  /opt/IHaskell/ihaskell-display/ihaskell-charts/
+  /opt/IHaskell/ihaskell-display/ihaskell-diagrams/
+  /opt/IHaskell/ihaskell-display/ihaskell-gnuplot/
+  /opt/IHaskell/ihaskell-display/ihaskell-graphviz/
+  /opt/IHaskell/ihaskell-display/ihaskell-hatex/
+  /opt/IHaskell/ihaskell-display/ihaskell-juicypixels/
+  /opt/IHaskell/ihaskell-display/ihaskell-magic/
+  /opt/IHaskell/ihaskell-display/ihaskell-plot/
+  /opt/IHaskell/ihaskell-display/ihaskell-rlangqq/
+  /opt/IHaskell/ihaskell-display/ihaskell-static-canvas/
+  /opt/IHaskell/ihaskell-display/ihaskell-widgets/
+  /opt/dataframe/
+  /opt/dataframe-hasktorch/
+  /opt/ihaskell-dataframe/
+
+package hlint
+  flags: +ghc-lib
+
+source-repository-package
+  type: git
+  location: https://github.com/IHaskell/IHaskell
+  tag: 9bbc5db18d1a3c5efb7522edb202f959074c831a
+
+constraints:
+  hlint >= 3.6 && < 3.8,
+  ghc-lib-parser < 9.8,
+  ghc-lib-parser-ex < 9.8,
+  ghc-typelits-extra < 0.4.7,
+  ghc-typelits-natnormalise < 0.7.10,
+  ghc-tcplugin-api < 0.18
+
+-- Allow newer versions if needed for compatibility
+allow-newer:all
+
+-- Optimization and build settings
+optimization: True
+jobs: $ncpus
+
+write-ghc-environment-files: always

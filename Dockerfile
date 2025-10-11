@@ -1,22 +1,27 @@
-ARG BASE_CONTAINER=jupyter/base-notebook:lab-3.2.4@sha256:438e87954dedd8b3c0088c89923ed29c9e14f139428c98d79c9ebabe55adc01d
-
-# JupyterLab versions > 3.2.4 have this bug:
-# https://github.com/jupyterlab/jupyterlab/issues/13383
+ARG BASE_CONTAINER=quay.io/jupyter/minimal-notebook:ubuntu-24.04
 
 FROM $BASE_CONTAINER
+
 # https://hub.docker.com/r/jupyter/base-notebook/tags
 
-LABEL maintainer="James Brock <jamesbrock@gmail.com>"
+LABEL maintainer="Michael Chavinda <mschavinda@gmail.com>"
 
-# Extra arguments to `stack build`. Used to build --fast, see Makefile.
-ARG STACK_ARGS=
+# Extra arguments to `cabal build`. Used to build with optimization flags.
+ARG CABAL_ARGS=
 
 USER root
 
-# The global snapshot package database will be here in the STACK_ROOT.
-ENV STACK_ROOT=/opt/stack
-RUN mkdir -p $STACK_ROOT
-RUN fix-permissions $STACK_ROOT
+# The global cabal configuration and package database will be here
+ENV CABAL_DIR=/opt/cabal
+ENV CABAL_CONFIG=${CABAL_DIR}/config
+ENV LIBTORCH_HOME=/opt/libtorch
+ENV LIBTORCH_CUDA_VERSION=cpu
+RUN mkdir -p $CABAL_DIR
+RUN touch $CABAL_CONFIG
+RUN mkdir -p $LIBTORCH_HOME
+RUN fix-permissions $CABAL_DIR
+RUN fix-permissions $CABAL_CONFIG
+RUN fix-permissions $LIBTORCH_HOME
 
 # Install system dependencies
 RUN apt-get update && apt-get install -yq --no-install-recommends \
@@ -38,10 +43,9 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         graphviz \
 # for ihaskell-gnuplot
         gnuplot-nox \
-# for Stack download
+# for ghcup and cabal
         curl \
-# Stack Debian/Ubuntu manual install dependencies
-# https://docs.haskellstack.org/en/stable/install_and_upgrade/#linux-generic
+        build-essential \
         g++ \
         gcc \
         libc6-dev \
@@ -55,135 +59,120 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
         netbase \
         zstd \
         libzstd-dev \
+        libnuma-dev \
+        libncurses-dev \
+        zlib1g-dev liblapack-dev libblas-dev devscripts debhelper python3-pip cmake curl wget unzip git libtinfo6 libncurses-dev python3 python3-yaml \
 # Need less for general maintenance
         less && \
 # Clean up apt
     rm -rf /var/lib/apt/lists/*
 
-# Stack Linux (generic) Manual download
-# https://docs.haskellstack.org/en/stable/install_and_upgrade/#linux-generic
-#
-# So that we can control Stack version, we do manual install instead of
-# automatic install:
-#
-#    curl -sSL https://get.haskellstack.org/ | sh
-#
-ARG STACK_VERSION="3.7.1"
-ARG STACK_BINDIST="stack-${STACK_VERSION}-linux-x86_64"
-RUN    cd /tmp \
-    && curl -sSL --output ${STACK_BINDIST}.tar.gz https://github.com/commercialhaskell/stack/releases/download/v${STACK_VERSION}/${STACK_BINDIST}.tar.gz \
-    && tar zxf ${STACK_BINDIST}.tar.gz \
-    && cp ${STACK_BINDIST}/stack /usr/bin/stack \
-    && rm -rf ${STACK_BINDIST}.tar.gz ${STACK_BINDIST} \
-    && stack --version
+# Install ghcup
+# https://www.haskell.org/ghcup/install/
+ENV BOOTSTRAP_HASKELL_NONINTERACTIVE=1
+ENV BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
+ENV BOOTSTRAP_HASKELL_CABAL_VERSION=recommended
+ENV GHCUP_INSTALL_BASE_PREFIX=/opt
+RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 
-# Stack global non-project-specific config stack.config.yaml
-# https://docs.haskellstack.org/en/stable/yaml_configuration/#non-project-specific-config
-RUN mkdir -p /etc/stack
-COPY stack.config.yaml /etc/stack/config.yaml
-RUN fix-permissions /etc/stack
+# Add ghcup binaries to PATH
+ENV PATH=/opt/.ghcup/bin:${PATH}
 
-# Stack global project stack.yaml
-# https://docs.haskellstack.org/en/stable/yaml_configuration/#yaml-configuration
-RUN mkdir -p $STACK_ROOT/global-project
-COPY global-project.stack.yaml $STACK_ROOT/global-project/stack.yaml
-RUN    chown --recursive $NB_UID:users $STACK_ROOT/global-project \
-    && fix-permissions $STACK_ROOT/global-project
+# Verify installations
+RUN ghc --version && cabal --version
+
+# Update cabal package list
+RUN cabal update
+
+# Create cabal config directory
+RUN mkdir -p ${CABAL_DIR}
+
+# Create global cabal.project
+RUN mkdir -p /opt/cabal-project
+COPY cabal.project /opt/cabal-project/cabal.project
+COPY setup_torch.sh /opt/cabal-project/setup_torch.sh
+RUN chmod +x /opt/cabal-project/setup_torch.sh
+RUN cd /opt/cabal-project && /opt/cabal-project/setup_torch.sh
+RUN chown --recursive $NB_UID:users /opt/cabal-project \
+    && fix-permissions /opt/cabal-project
 
 # fix-permissions for /usr/local/share/jupyter so that we can install
 # the IHaskell kernel there. Seems like the best place to install it, see
 #      jupyter --paths
 #      jupyter kernelspec list
-RUN    mkdir -p /usr/local/share/jupyter \
+RUN mkdir -p /usr/local/share/jupyter \
     && fix-permissions /usr/local/share/jupyter \
     && mkdir -p /usr/local/share/jupyter/kernels \
     && fix-permissions /usr/local/share/jupyter/kernels
 
 # Now make a bin directory for installing the ihaskell executable on
-# the PATH. This /opt/bin is referenced by the stack non-project-specific
-# config.
-RUN    mkdir -p /opt/bin \
+# the PATH.
+RUN mkdir -p /opt/bin \
     && fix-permissions /opt/bin
 ENV PATH=${PATH}:/opt/bin
 
-RUN fix-permissions $STACK_ROOT
-RUN stack upgrade
-
 # Specify a git branch for IHaskell (can be branch or tag).
-# The resolver for all stack builds will be chosen from
-# the IHaskell/stack.yaml in this commit.
 # https://github.com/gibiansky/IHaskell/commits/master
 # IHaskell 2022-12-19
-ARG IHASKELL_COMMIT=08686e821f93fde0bcecf82b9febc4135b22bb8a
+ARG IHASKELL_COMMIT=9bbc5db18d1a3c5efb7522edb202f959074c831a
 
 # Clone IHaskell and install ghc from the IHaskell resolver
 RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
 RUN cd /opt && mv *IHaskell* IHaskell
 RUN fix-permissions /opt/IHaskell
 
-# Specify a git branch for hvega
-# https://github.com/DougBurke/hvega/commits/main
-# hvega 2022-06-16
-# hvega-0.12.0.3
-# ihaskell-hvega-0.5.0.3
-ARG HVEGA_COMMIT=2b453c230294b889564339853de02b0c1829a081
-RUN cd /opt && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT" | tar xzf - 
-RUN cd /opt && mv *hvega* hvega
-RUN fix-permissions /opt/hvega
-
 ARG IHASKELL_DISPLAY_COMMIT=e306d5ba296d09badad82358e1098d367daef0a1
 RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - 
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=38495ce67fae36d8611ca6bde4b3e9544239f5f4
-RUN cd /opt && curl -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
+ARG DATAFRAME_COMMIT=070c198a2314f8362dc684b9c6f50d2fea3a4620
+RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
+RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
 RUN fix-permissions /opt/dataframe
+RUN fix-permissions /opt/dataframe-hasktorch
 
-RUN stack setup
-RUN fix-permissions $STACK_ROOT
+RUN fix-permissions $CABAL_DIR
+
+COPY config $CABAL_CONFIG
+
+RUN cabal update
 
 # Build IHaskell
-#
-# Note that we are NOT in the /opt/IHaskell directory here, we are
-# installing ihaskell via the paths given in /opt/stack/global-project/stack.yaml
-RUN    stack build $STACK_ARGS ihaskell \
+# Note that we are using the cabal.project in /opt/cabal-project
+RUN cd /opt/cabal-project \
+    && rm -f cabal.project.freeze \
     && fix-permissions /opt/IHaskell \
-    && fix-permissions $STACK_ROOT
+    && fix-permissions $LIBTORCH_HOME \
+    && fix-permissions $CABAL_DIR
+
+RUN cd /opt/cabal-project && cabal install --lib dataframe ihaskell-dataframe ihaskell dataframe-hasktorch ihaskell-dataframe
 
 # Install IHaskell.Display libraries
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
-RUN stack build $STACK_ARGS ihaskell-aeson
-RUN stack build $STACK_ARGS ihaskell-blaze
-# RUN stack build $STACK_ARGS ihaskell-charts
-# RUN stack build $STACK_ARGS ihaskell-diagrams
-RUN stack build $STACK_ARGS ihaskell-gnuplot
-RUN stack build $STACK_ARGS ihaskell-graphviz
-RUN stack build $STACK_ARGS ihaskell-hatex
-RUN stack build $STACK_ARGS ihaskell-juicypixels
-#   && stack build $STACK_ARGS ihaskell-magic \
-# RUN stack build $STACK_ARGS ihaskell-plot
-#   && stack build $STACK_ARGS ihaskell-rlangqq \
-#   && stack build $STACK_ARGS ihaskell-static-canvas \
-RUN stack build $STACK_ARGS ihaskell-widgets
-RUN stack build $STACK_ARGS hvega
-RUN stack build $STACK_ARGS dataframe
-RUN stack build $STACK_ARGS ihaskell-dataframe
-# RUN stack build $STACK_ARGS ihaskell-hvega
-RUN stack build $STACK_ARGS dataframe
-RUN fix-permissions $STACK_ROOT \
-# Fix for https://github.com/IHaskell/ihaskell-notebook/issues/14#issuecomment-636334824
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-aeson && cabal install --lib ihaskell-aeson
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-blaze && cabal install --lib ihaskell-blaze
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-gnuplot && cabal install --lib ihaskell-gnuplot
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-graphviz && cabal install --lib ihaskell-graphviz
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-hatex && cabal install --lib ihaskell-hatex
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-juicypixels && cabal install --lib ihaskell-juicypixels
+# RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell-widgets && cabal install --lib ihaskell-widgets
+
+RUN fix-permissions $CABAL_DIR \
+    && fix-permissions $LIBTORCH_HOME \
     && fix-permissions /opt/IHaskell \
-    && fix-permissions /opt/hvega \
     && fix-permissions /opt/ihaskell-dataframe \
+    && fix-permissions /opt/dataframe-hasktorch \
     && fix-permissions /opt/dataframe
 
-# Cleanup
-# Don't clean IHaskell/.stack-work, 7GB, this causes issue #5
-#   && rm -rf $(find /opt/IHaskell -type d -name .stack-work) \
-# Don't clean /opt/hvega
-# We can't actually figure out anything to cleanup.
+RUN cd /opt/cabal-project && cabal build ihaskell --force-reinstalls && cabal install --lib dataframe ihaskell-dataframe hasktorch ihaskell dataframe-hasktorch ihaskell-dataframe ihaskell template-haskell vector text containers array random unix directory --force-reinstalls --install-method=copy --installdir=/opt/bin \
+    && fix-permissions /opt/bin
+
+# Install ihaskell binary to /opt/bin
+RUN cd /opt/cabal-project \
+    && cabal v2-install $CABAL_ARGS ihaskell --install-method=copy --installdir=/opt/bin --package-env=./opt/cabal/store/ghc-9.6.7 \
+    && fix-permissions /opt/bin
 
 # Bug workaround for https://github.com/IHaskell/ihaskell-notebook/issues/9
 RUN mkdir -p /home/jovyan/.local/share/jupyter/runtime \
@@ -192,74 +181,57 @@ RUN mkdir -p /home/jovyan/.local/share/jupyter/runtime \
     && fix-permissions /home/jovyan/.local/share/jupyter \
     && fix-permissions /home/jovyan/.local/share/jupyter/runtime
 
-# Install system-level ghc using the ghc which was installed by stack
-# using the IHaskell resolver.
-RUN mkdir -p /opt/ghc && ln -s `stack path --compiler-bin` /opt/ghc/bin \
-    && fix-permissions /opt/ghc
-ENV PATH=${PATH}:/opt/ghc/bin
+# Add GHC to PATH
+ENV PATH=${PATH}:/opt/.ghcup/ghc/9.6.7/bin
+
+RUN rm -Rf /home/jovyan/.stack
+RUN fix-permissions /opt/cabal-project
+RUN fix-permissions "/home/${NB_USER}"
+
+# (Re)install the IHaskell kernel spec after the env is in place
+RUN ihaskell install --prefix=/usr/local
+
+RUN fix-permissions "/home/${NB_USER}"
+RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
+
+COPY ./app/Iris.ipynb /home/$NB_USER/
+RUN fix-permissions "/home/${NB_USER}"
 
 # Switch back to jovyan user
 USER $NB_UID
 
-RUN \
-# Install the IHaskell kernel at /usr/local/share/jupyter/kernels, which is
-# in `jupyter --paths` data:
-       stack exec ihaskell -- install --stack --prefix=/usr/local --debug
-
-# # We don't need to install the ihaskell_labextension for JupyterLab syntax highlighting
-# # https://github.com/IHaskell/IHaskell/issues/1238#issuecomment-907658217
-#     && npm install -g typescript \
-#     && cd /opt/IHaskell/jupyterlab-ihaskell \
-#     && npm install \
-#     && npm run build \
-#     && jupyter labextension install . \
-# # Cleanup
-#     && npm cache clean --force \
-#     && rm -rf /home/$NB_USER/.cache/yarn \
-# # Clean jupyterlab-ihaskell/node_nodemodules, 86MB
-#     && rm -rf /opt/IHaskell/jupyterlab-ihaskell/node_modules
+RUN fix-permissions "/home/${NB_USER}"
+RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 
 RUN conda install --quiet --yes \
 # ihaskell-widgets needs ipywidgets
 # https://github.com/IHaskell/IHaskell/issues/1380
     'ipywidgets=7.7.1' && \
-# ihaskell-hvega doesn't need an extension. https://github.com/jupyterlab/jupyter-renderers
-#    'jupyterlab-vega3' && \
     conda clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
 # Example IHaskell notebooks will be collected in this directory.
 ARG EXAMPLES_PATH=/home/$NB_USER/ihaskell_examples
 
 # Collect all the IHaskell example notebooks in EXAMPLES_PATH.
-RUN    mkdir -p $EXAMPLES_PATH \
+RUN mkdir -p $EXAMPLES_PATH \
     && cd $EXAMPLES_PATH \
     && mkdir -p ihaskell \
     && cp --recursive /opt/IHaskell/notebooks/* ihaskell/ \
     && mkdir -p ihaskell-juicypixels \
     && cp /opt/IHaskell/ihaskell-display/ihaskell-juicypixels/*.ipynb ihaskell-juicypixels/ \
-    # && mkdir -p ihaskell-charts \
-    # && cp /opt/IHaskell/ihaskell-display/ihaskell-charts/*.ipynb ihaskell-charts/ \
-    # && mkdir -p ihaskell-diagrams \
-    # && cp /opt/IHaskell/ihaskell-display/ihaskell-diagrams/*.ipynb ihaskell-diagrams/ \
     && mkdir -p ihaskell-gnuplot \
     && cp /opt/IHaskell/ihaskell-display/ihaskell-gnuplot/*.ipynb ihaskell-gnuplot/ \
     && mkdir -p ihaskell-widgets \
     && cp --recursive /opt/IHaskell/ihaskell-display/ihaskell-widgets/Examples/* ihaskell-widgets/ \
-    && mkdir -p ihaskell-hvega \
-    && cp /opt/hvega/notebooks/*.ipynb ihaskell-hvega/ \
-    && cp /opt/hvega/notebooks/*.tsv ihaskell-hvega/ \
-    # && mkdir -p ihaskell-plot \
-    # && cp /opt/IHaskell/ihaskell-display/ihaskell-plot/PlotExample.ipynb ihaskell-plot/ \
     && fix-permissions $EXAMPLES_PATH
 
 RUN cp /opt/ihaskell-dataframe/app/*.ipynb /home/$NB_USER/
 RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/
+RUN cp /opt/dataframe/data/iris.parquet /home/$NB_USER/
+
 # Enable this for debugging the kernel messages
 RUN conda install --quiet --yes \
     'jupyterlab-kernelspy' && \
     conda clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
-
