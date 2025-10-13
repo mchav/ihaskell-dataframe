@@ -147,7 +147,7 @@ RUN cd /opt/cabal-project \
     && fix-permissions $LIBTORCH_HOME \
     && fix-permissions $CABAL_DIR
 
-RUN cd /opt/cabal-project && cabal install --lib dataframe ihaskell-dataframe ihaskell dataframe-hasktorch ihaskell-dataframe
+RUN cd /opt/cabal-project && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe ihaskell dataframe-hasktorch ihaskell-dataframe
 
 # Install IHaskell.Display libraries
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
@@ -166,7 +166,7 @@ RUN fix-permissions $CABAL_DIR \
     && fix-permissions /opt/dataframe-hasktorch \
     && fix-permissions /opt/dataframe
 
-RUN cd /opt/cabal-project && cabal build ihaskell --force-reinstalls && cabal install --lib dataframe ihaskell-dataframe hasktorch ihaskell dataframe-hasktorch ihaskell-dataframe ihaskell template-haskell vector text containers array random unix directory --force-reinstalls --install-method=copy --installdir=/opt/bin \
+RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell --force-reinstalls && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe hasktorch ihaskell dataframe-hasktorch ihaskell-dataframe ihaskell template-haskell vector text containers array random unix directory --force-reinstalls --install-method=copy --installdir=/opt/bin \
     && fix-permissions /opt/bin
 
 # Install ihaskell binary to /opt/bin
@@ -195,6 +195,7 @@ RUN fix-permissions "/home/${NB_USER}"
 RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 
 COPY ./app/Iris.ipynb /home/$NB_USER/
+COPY ./app/California_Housing.ipynb /home/$NB_USER/
 RUN fix-permissions "/home/${NB_USER}"
 
 # Switch back to jovyan user
@@ -226,7 +227,6 @@ RUN mkdir -p $EXAMPLES_PATH \
     && cp --recursive /opt/IHaskell/ihaskell-display/ihaskell-widgets/Examples/* ihaskell-widgets/ \
     && fix-permissions $EXAMPLES_PATH
 
-RUN cp /opt/ihaskell-dataframe/app/*.ipynb /home/$NB_USER/
 RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/
 RUN cp /opt/dataframe/data/iris.parquet /home/$NB_USER/
 
