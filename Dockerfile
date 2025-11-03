@@ -142,7 +142,6 @@ RUN cabal update
 # Build IHaskell
 # Note that we are using the cabal.project in /opt/cabal-project
 RUN cd /opt/cabal-project \
-    && rm -f cabal.project.freeze \
     && fix-permissions /opt/IHaskell \
     && fix-permissions $LIBTORCH_HOME \
     && fix-permissions $CABAL_DIR
