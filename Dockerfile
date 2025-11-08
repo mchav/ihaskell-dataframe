@@ -235,6 +235,7 @@ RUN conda install --quiet --yes \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
 
+USER root
+COPY rc.hs /home/${NB_USER}/.ihaskell/rc.hs
 RUN fix-permissions "/home/${NB_USER}/.ihaskell"
-COPY ./rc.hs /home/$NB_USER/.ihaskell/
-RUN fix-permissions "/home/${NB_USER}/.ihaskell"
+USER ${NB_USER}
