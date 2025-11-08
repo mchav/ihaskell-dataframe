@@ -126,7 +126,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=a833f46afb7f9921050099b9f15281f573d37568
+ARG DATAFRAME_COMMIT=981d42377faba0bb4453b71e04cac7e54e42c072
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
@@ -234,3 +234,7 @@ RUN conda install --quiet --yes \
     'jupyterlab-kernelspy' && \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
+
+RUN fix-permissions "/home/${NB_USER}/.ihaskell"
+COPY ./rc.hs /home/$NB_USER/.ihaskell/
+RUN fix-permissions "/home/${NB_USER}/.ihaskell"
