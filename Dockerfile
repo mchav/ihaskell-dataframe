@@ -126,7 +126,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=918d7cdb193eac7e7cacb3c879516bb0048be9ce
+ARG DATAFRAME_COMMIT=293a952e8642f26109a17987f9a89d30e282ad75
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
@@ -203,8 +203,9 @@ RUN ihaskell install --prefix=/usr/local
 RUN fix-permissions "/home/${NB_USER}"
 RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 
-COPY ./app/Iris.ipynb /home/$NB_USER/
-COPY ./app/California_Housing.ipynb /home/$NB_USER/
+RUN mkdir -p /home/$NB_USER/examples
+COPY ./app/Iris.ipynb /home/$NB_USER/examples
+COPY ./app/California_Housing.ipynb /home/$NB_USER/examples
 RUN fix-permissions "/home/${NB_USER}"
 
 # Switch back to jovyan user
@@ -220,24 +221,12 @@ RUN conda install --quiet --yes \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
 
-# Example IHaskell notebooks will be collected in this directory.
-ARG EXAMPLES_PATH=/home/$NB_USER/ihaskell_examples
-
-# Collect all the IHaskell example notebooks in EXAMPLES_PATH.
-RUN mkdir -p $EXAMPLES_PATH \
-    && cd $EXAMPLES_PATH \
-    && mkdir -p ihaskell \
-    && cp --recursive /opt/IHaskell/notebooks/* ihaskell/ \
-    && mkdir -p ihaskell-juicypixels \
-    && cp /opt/IHaskell/ihaskell-display/ihaskell-juicypixels/*.ipynb ihaskell-juicypixels/ \
-    && mkdir -p ihaskell-gnuplot \
-    && cp /opt/IHaskell/ihaskell-display/ihaskell-gnuplot/*.ipynb ihaskell-gnuplot/ \
-    && mkdir -p ihaskell-widgets \
-    && cp --recursive /opt/IHaskell/ihaskell-display/ihaskell-widgets/Examples/* ihaskell-widgets/ \
-    && fix-permissions $EXAMPLES_PATH
-
-RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/
-RUN cp /opt/dataframe/data/iris.parquet /home/$NB_USER/
+RUN mkdir -p /home/$NB_USER/examples/data
+RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/examples/data
+RUN cp /opt/dataframe/data/iris.parquet /home/$NB_USER/examples/data
+RUN mkdir -p /home/$NB_USER/learning && \
+    cd /home/$NB_USER/learning && \
+    git clone https://github.com/mchav/applied-data-science-with-haskell
 
 # Enable this for debugging the kernel messages
 RUN conda install --quiet --yes \
