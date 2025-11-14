@@ -126,7 +126,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=8ec8e212d25713c35f6439bf86502265a2d0e508
+ARG DATAFRAME_COMMIT=918d7cdb193eac7e7cacb3c879516bb0048be9ce
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
@@ -146,7 +146,12 @@ RUN cd /opt/cabal-project \
     && fix-permissions $LIBTORCH_HOME \
     && fix-permissions $CABAL_DIR
 
-RUN cd /opt/cabal-project && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe ihaskell dataframe-hasktorch ihaskell-dataframe
+RUN cd /opt/cabal-project && \
+    cabal install $CABAL_ARGS --lib \
+    dataframe ihaskell-dataframe ihaskell \
+    dataframe-hasktorch ihaskell-dataframe \
+    regex-tdfa containers cassava statistics \
+    monad-bayes time aeson
 
 # Install IHaskell.Display libraries
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
@@ -165,7 +170,12 @@ RUN fix-permissions $CABAL_DIR \
     && fix-permissions /opt/dataframe-hasktorch \
     && fix-permissions /opt/dataframe
 
-RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell --force-reinstalls && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe hasktorch ihaskell dataframe-hasktorch ihaskell-dataframe ihaskell template-haskell vector text containers array random unix directory --force-reinstalls --install-method=copy --installdir=/opt/bin \
+RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell --force-reinstalls \
+    && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe hasktorch \
+    ihaskell dataframe-hasktorch ihaskell-dataframe time ihaskell template-haskell \
+    vector text containers array random unix directory regex-tdfa containers \
+    cassava statistics monad-bayes aeson \
+    --force-reinstalls --install-method=copy --installdir=/opt/bin \
     && fix-permissions /opt/bin
 
 # Install ihaskell binary to /opt/bin
