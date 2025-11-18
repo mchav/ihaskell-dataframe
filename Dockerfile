@@ -111,10 +111,7 @@ RUN mkdir -p /opt/bin \
     && fix-permissions /opt/bin
 ENV PATH=${PATH}:/opt/bin
 
-# Specify a git branch for IHaskell (can be branch or tag).
-# https://github.com/gibiansky/IHaskell/commits/master
-# IHaskell 2022-12-19
-ARG IHASKELL_COMMIT=9bbc5db18d1a3c5efb7522edb202f959074c831a
+ARG IHASKELL_COMMIT=dd67c78863586f33952bfe436c5f2b7e499dde8c
 
 # Clone IHaskell and install ghc from the IHaskell resolver
 RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
@@ -126,7 +123,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=293a952e8642f26109a17987f9a89d30e282ad75
+ARG DATAFRAME_COMMIT=f6a1a6d57154b8d0c58e66ad28c6fdba6811891d
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
