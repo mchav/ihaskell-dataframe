@@ -203,6 +203,10 @@ RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 RUN mkdir -p /home/$NB_USER/examples
 COPY ./app/Iris.ipynb /home/$NB_USER/examples
 COPY ./app/California_Housing.ipynb /home/$NB_USER/examples
+COPY ./app/getting_started.ipynb /home/$NB_USER/
+RUN jupyter trust /home/$NB_USER/examples/California_Housing.ipynb
+RUN jupyter trust /home/$NB_USER/examples/Iris.ipynb
+RUN jupyter trust /home/$NB_USER/getting_started.ipynb
 RUN fix-permissions "/home/${NB_USER}"
 
 # Switch back to jovyan user
