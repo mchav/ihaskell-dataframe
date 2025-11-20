@@ -123,7 +123,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=f6a1a6d57154b8d0c58e66ad28c6fdba6811891d
+ARG DATAFRAME_COMMIT=07e328f249dd6d3c3842470ca26502b368f3e7f3
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
