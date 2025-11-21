@@ -123,7 +123,7 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=8311bab93e99422df7c2157183dbad5b7938ddb7
+ARG DATAFRAME_COMMIT=ca89609c2ed5ac384d8b06c439b342d62b8e4911
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
@@ -218,7 +218,7 @@ RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 RUN conda install --quiet --yes \
 # ihaskell-widgets needs ipywidgets
 # https://github.com/IHaskell/IHaskell/issues/1380
-    'ipywidgets=7.7.1' && \
+    'ipywidgets=8.1.8' && \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
 
@@ -234,6 +234,8 @@ RUN conda install --quiet --yes \
     'jupyterlab-kernelspy' && \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
+
+RUN conda install -c conda-forge ipychart
 
 USER root
 COPY rc.hs /home/${NB_USER}/.ihaskell/rc.hs
