@@ -123,12 +123,21 @@ RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHA
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
 
-ARG DATAFRAME_COMMIT=ca89609c2ed5ac384d8b06c439b342d62b8e4911
+ARG DATAFRAME_COMMIT=f12bd45ea57d8d79c7c4202fcacd0f9971ee9276
 RUN cd /opt && curl  -L "https://github.com/mchav/dataframe/tarball/$DATAFRAME_COMMIT" | tar xzf - 
 RUN cd /opt && mv *mchav-dataframe* dataframe
 RUN cd /opt/dataframe && mv *dataframe-hasktorch* /opt/dataframe-hasktorch
 RUN fix-permissions /opt/dataframe
 RUN fix-permissions /opt/dataframe-hasktorch
+
+ARG HVEGA_COMMIT=5e18d53b7748dc5e23c6cd6c38dc722f01e2dde6
+
+RUN cd /opt/ \
+    && curl -L "https://github.com/DougBurke/hvega/tarball/$HVEGA_COMMIT" | tar xzf - \
+    && mv *hvega* hvega \
+    && cd /opt/hvega && mv *ihaskell-hvega* /opt/ihaskell-hvega \
+    && fix-permissions /opt/hvega \
+    && fix-permissions /opt/ihaskell-hvega
 
 RUN fix-permissions $CABAL_DIR
 
@@ -148,7 +157,7 @@ RUN cd /opt/cabal-project && \
     dataframe ihaskell-dataframe ihaskell \
     dataframe-hasktorch ihaskell-dataframe \
     regex-tdfa containers cassava statistics \
-    monad-bayes time aeson
+    monad-bayes time aeson hvega ihaskell-hvega
 
 # Install IHaskell.Display libraries
 # https://github.com/gibiansky/IHaskell/tree/master/ihaskell-display
@@ -171,7 +180,7 @@ RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell --force-reinstalls
     && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe hasktorch \
     ihaskell dataframe-hasktorch ihaskell-dataframe time ihaskell template-haskell \
     vector text containers array random unix directory regex-tdfa containers \
-    cassava statistics monad-bayes aeson \
+    cassava statistics monad-bayes aeson bytestring ghc-events hvega ihaskell-hvega \
     --force-reinstalls --install-method=copy --installdir=/opt/bin \
     && fix-permissions /opt/bin
 
