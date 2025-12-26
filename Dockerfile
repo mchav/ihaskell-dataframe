@@ -212,9 +212,14 @@ RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 RUN mkdir -p /home/$NB_USER/examples
 COPY ./app/Iris.ipynb /home/$NB_USER/examples
 COPY ./app/California_Housing.ipynb /home/$NB_USER/examples
+COPY ./app/performance_exploration.ipynb /home/$NB_USER/examples
 COPY ./app/getting_started.ipynb /home/$NB_USER/
+RUN mkdir -p /home/$NB_USER/examples/data
+COPY ./data/fast.eventlog /home/$NB_USER/examples/data
+COPY ./data/leaky.eventlog /home/$NB_USER/examples/data
 RUN jupyter trust /home/$NB_USER/examples/California_Housing.ipynb
 RUN jupyter trust /home/$NB_USER/examples/Iris.ipynb
+RUN jupyter trust /home/$NB_USER/examples/performance_exploration.ipynb
 RUN jupyter trust /home/$NB_USER/getting_started.ipynb
 RUN fix-permissions "/home/${NB_USER}"
 
@@ -231,7 +236,6 @@ RUN conda install --quiet --yes \
     conda clean --all -f -y && \
     fix-permissions "/home/${NB_USER}"
 
-RUN mkdir -p /home/$NB_USER/examples/data
 RUN cp /opt/dataframe/data/housing.csv /home/$NB_USER/examples/data
 RUN cp /opt/dataframe/data/iris.parquet /home/$NB_USER/examples/data
 RUN mkdir -p /home/$NB_USER/learning && \
