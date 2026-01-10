@@ -217,9 +217,13 @@ COPY ./app/getting_started.ipynb /home/$NB_USER/
 RUN mkdir -p /home/$NB_USER/examples/data
 COPY ./data/fast.eventlog /home/$NB_USER/examples/data
 COPY ./data/leaky.eventlog /home/$NB_USER/examples/data
+COPY ./app/titanic.ipynb /home/$NB_USER/examples
+COPY ./data/titanic_train.csv /home/$NB_USER/examples/data
+COPY ./data/titanic_test.csv /home/$NB_USER/examples/data
 RUN jupyter trust /home/$NB_USER/examples/California_Housing.ipynb
 RUN jupyter trust /home/$NB_USER/examples/Iris.ipynb
 RUN jupyter trust /home/$NB_USER/examples/performance_exploration.ipynb
+RUN jupyter trust /home/$NB_USER/examples/titanic.ipynb
 RUN jupyter trust /home/$NB_USER/getting_started.ipynb
 RUN fix-permissions "/home/${NB_USER}"
 
