@@ -180,7 +180,7 @@ RUN cd /opt/cabal-project && cabal build $CABAL_ARGS ihaskell --force-reinstalls
     && cabal install $CABAL_ARGS --lib dataframe ihaskell-dataframe hasktorch \
     ihaskell dataframe-hasktorch ihaskell-dataframe time ihaskell template-haskell \
     vector text containers array random unix directory regex-tdfa containers \
-    cassava statistics monad-bayes aeson bytestring ghc-events hvega ihaskell-hvega \
+    cassava statistics monad-bayes aeson bytestring hvega ihaskell-hvega \
     --force-reinstalls --install-method=copy --installdir=/opt/bin \
     && fix-permissions /opt/bin
 
@@ -212,17 +212,13 @@ RUN fix-permissions "/usr/local/share/jupyter/kernels/haskell"
 RUN mkdir -p /home/$NB_USER/examples
 COPY ./app/Iris.ipynb /home/$NB_USER/examples
 COPY ./app/California_Housing.ipynb /home/$NB_USER/examples
-COPY ./app/performance_exploration.ipynb /home/$NB_USER/examples
 COPY ./app/getting_started.ipynb /home/$NB_USER/
 RUN mkdir -p /home/$NB_USER/examples/data
-COPY ./data/fast.eventlog /home/$NB_USER/examples/data
-COPY ./data/leaky.eventlog /home/$NB_USER/examples/data
 COPY ./app/titanic.ipynb /home/$NB_USER/examples
 COPY ./data/titanic_train.csv /home/$NB_USER/examples/data
 COPY ./data/titanic_test.csv /home/$NB_USER/examples/data
 RUN jupyter trust /home/$NB_USER/examples/California_Housing.ipynb
 RUN jupyter trust /home/$NB_USER/examples/Iris.ipynb
-RUN jupyter trust /home/$NB_USER/examples/performance_exploration.ipynb
 RUN jupyter trust /home/$NB_USER/examples/titanic.ipynb
 RUN jupyter trust /home/$NB_USER/getting_started.ipynb
 RUN fix-permissions "/home/${NB_USER}"
