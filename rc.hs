@@ -25,16 +25,3 @@ default (Int, T.Text, Double)
 
 __brightBlue s = "\ESC[94m" ++ s ++ "\ESC[0m"
 __brightGreen s = "\ESC[92m" ++ s ++ "\ESC[0m"
-
-putStrLn "========================================"
-putStrLn ("              📦" ++ (__brightBlue "Dataframe"))
-putStrLn "========================================"
-putStrLn ""
-putStrLn "✨  Modules were automatically imported."
-putStrLn ""
-putStrLn "💡  Use prefix 'D' for core functionality."
-putStrLn ("        ● E.g. " ++ (__brightGreen "D.readCsv \"/path/to/file\""))
-putStrLn "💡  Use prefix 'F' for expression functions."
-putStrLn ("        ● E.g. " ++ (__brightGreen "F.sum (F.col @Int \"value\")"))
-putStrLn ""
-putStrLn "✅ Ready."
