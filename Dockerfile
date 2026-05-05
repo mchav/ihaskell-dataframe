@@ -118,7 +118,7 @@ RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_
 RUN cd /opt && mv *IHaskell* IHaskell
 RUN fix-permissions /opt/IHaskell
 
-ARG IHASKELL_DISPLAY_COMMIT=e306d5ba296d09badad82358e1098d367daef0a1
+ARG IHASKELL_DISPLAY_COMMIT=b38fe619e9a25970159b06b671cfdb0445dc5b49
 RUN cd /opt && curl -L "https://github.com/mchav/ihaskell-dataframe/tarball/$IHASKELL_DISPLAY_COMMIT" | tar xzf - 
 RUN cd /opt && mv *ihaskell-dataframe* ihaskell-dataframe 
 RUN fix-permissions /opt/ihaskell-dataframe
