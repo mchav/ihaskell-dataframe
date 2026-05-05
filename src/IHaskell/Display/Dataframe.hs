@@ -12,7 +12,7 @@ import qualified Data.Text as T
 instance IHaskellDisplay DataFrame where
   display val = return $ Display [stringDisplay, markdownDisplay]
     where
-      str = T.unpack (D.toMarkdownTable val)
+      str = D.toMarkdownTable' val
       stringDisplay = plain str
       markdownDisplay = markdown str
 
