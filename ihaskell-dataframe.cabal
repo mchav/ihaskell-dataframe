@@ -36,7 +36,7 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends: base >=4.7 && <5
-    , dataframe >= 0.3.3.6 && < 1
+    , dataframe >= 1
     , dataframe-hasktorch >= 0.1.0.2 && < 1
     , hasktorch >= 0.2.1.6 && < 1
     , ihaskell == 0.13.0.0
@@ -75,7 +75,7 @@ test-suite ihaskell-dataframe-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends: base >=4.7 && <5
-    , dataframe >= 0.3.3.6 && < 1
+    , dataframe >= 1
     , ihaskell >= 0.13.0.0 && < 1
     , ihaskell-dataframe >= 0.1.0.0 && < 1
     , text >= 2.0 && < 3
