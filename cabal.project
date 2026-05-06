@@ -2,6 +2,7 @@
 -- Uses GHC 9.6.7 (matching lts-22.44)
 
 packages:
+  /opt/IHaskell/
   /opt/IHaskell/ipython-kernel/
   /opt/IHaskell/ghc-parser/
   /opt/IHaskell/ihaskell-display/ihaskell-aeson/
@@ -23,11 +24,6 @@ packages:
 
 package hlint
   flags: +ghc-lib
-
-source-repository-package
-  type: git
-  location: https://github.com/IHaskell/IHaskell
-  tag: 9bbc5db18d1a3c5efb7522edb202f959074c831a
 
 constraints:
   hlint >= 3.6 && < 3.8,
