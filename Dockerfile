@@ -111,7 +111,7 @@ RUN mkdir -p /opt/bin \
     && fix-permissions /opt/bin
 ENV PATH=${PATH}:/opt/bin
 
-ARG IHASKELL_COMMIT=dd67c78863586f33952bfe436c5f2b7e499dde8c
+ARG IHASKELL_COMMIT=60bb5b2ebaf04dab5d6ceccc3ffcd7a71c53b88c
 
 # Clone IHaskell and install ghc from the IHaskell resolver
 RUN cd /opt && curl -L "https://github.com/gibiansky/IHaskell/tarball/$IHASKELL_COMMIT" | tar xzf -
